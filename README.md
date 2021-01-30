@@ -1,5 +1,5 @@
 # Synk
-Analyse trees and show diffencies. Useful to make backups.
+Python3 Argparse script which analyse trees and show diffencies. Useful to make backups.
 
 ## Installing
 Download the script `Synk.py` ;
