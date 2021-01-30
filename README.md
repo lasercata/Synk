@@ -1,7 +1,7 @@
 # Synk
 Analyse trees and show diffencies
 
-# Usage
+## Usage
 ```
 Synk.py -h
 usage: Synk [-h] [-v] [-x EXCLUDE] [-f] [-nc] path1 path2
