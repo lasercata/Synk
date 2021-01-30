@@ -4,9 +4,13 @@ Python3 Argparse script which analyse trees and show diffencies. Useful to make 
 ## Installing
 Download the script `Synk.py` ;
 
-Make it executable : `chmod +x Synk.py` ;
+Make it executable : 
 
-Then you can copy it to `/bin` to ba able to launch it from anywhere (or add the path to the PATH) : `sudo cp Synk.py /bin/Synk`
+`$ chmod +x Synk.py`
+
+Then you can copy it to `/bin` to ba able to launch it from anywhere (or add the path to the PATH) :
+
+`$ sudo cp Synk.py /bin/Synk`
 
 ## Usage
 ```
