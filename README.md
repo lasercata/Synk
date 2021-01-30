@@ -2,8 +2,10 @@
 Analyse trees and show diffencies. Useful to make backups.
 
 ## Installing
-Download the script `Synk.py`
-Make it executable : `chmod +x Synk.py`
+Download the script `Synk.py`.
+
+Make it executable : `chmod +x Synk.py`.
+
 Then you can copy it to `/bin` to ba able to launch it from anywhere (or add the path to the PATH)
 
 ## Usage
