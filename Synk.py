@@ -4,14 +4,16 @@
 '''This script is useful to check differencies and sync trees.'''
 
 auth = 'Lasercata'
-last_update = '2020.12.18'
-version = '0.1'
+last_update = '2021.01.30'
+version = '0.3'
 
 
 ##-import
 #------main
 from os import walk, listdir, path, stat
 #from os.path import abspath, exists
+
+from datetime import datetime as dt
 
 import hashlib
 
@@ -202,10 +204,12 @@ class Synk:
         if ret_type not in ('h', 'human', 'n', 'normal'):
             raise ValueError(f'The argument "ret_type" should be set to "h" or "n", however "{ret_type}" was found !!!')
 
-        m_dirs, m_files, updt_f = self._compare(exclude, ret_type)
+        t0 = dt.now()
+        m_dirs, m_files, updt_f, nb_files = self._compare(exclude, ret_type)
         m_dirs[1] += Synk(self.path_2, self.path_1)._compare(exclude, ret_type)[0][2]
+        t_dif = dt.now() - t0
 
-        return m_dirs, m_files, updt_f
+        return m_dirs, m_files, updt_f, nb_files, t_dif
 
 
     def _compare(self, exclude, ret_type='h'):
@@ -214,8 +218,11 @@ class Synk:
         m_dirs = {1: [], 2: []}     # Missing directories
         m_files = {1: [], 2: []}    # Missing files
         updt_f = {1: [], 2: []}     # Updated files : first list contain outdated files in path_1
+        nb_files = 0
 
         for r, d, f in walk(self.f_path_1):
+            nb_files += 1
+
             relative = r[len(self.f_path_1):] # Relative path from the path 1 or 2.
 
             if not path.exists(self.f_path_2 + relative): #Check if the same path exists in path_2/
@@ -261,7 +268,7 @@ class Synk:
                 #todo: also compare file size (difference of size) if mdate is different
 
 
-        return m_dirs, m_files, updt_f
+        return m_dirs, m_files, updt_f, nb_files
 
 
     def gcompare(self, exclude, ret_type):
@@ -269,7 +276,7 @@ class Synk:
 
         print('\nProcessing ...\n')
 
-        m_dirs, m_files, updt_f = self.compare(exclude, ret_type)
+        m_dirs, m_files, updt_f, nb_files, t_dif = self.compare(exclude, ret_type)
         n = 0
 
         if not(m_dirs[1] == m_files[1] == []):
@@ -319,6 +326,8 @@ class Synk:
         if n == 0:
             Color(Color.c_succes, self.color_use).out('Trees are up to date !\n')
 
+        print('---\n{} files parsed\nTime elapsed : {} s\n'.format(nb_files, t_dif))
+
 
     def sync(self):
         '''Use self.compare to synchronise the two paths.'''
@@ -336,8 +345,8 @@ class Parser:
 
         self.parser = argparse.ArgumentParser(
             prog='Synk',
-            description='List differencies between path1 and path2.\nCan sync the two trees.',
-            epilog='Examples :\n\tSynk path1 path2\n\tSynk -s path1 path2',
+            description='List differencies between path1 and path2.', #'\nCan sync the two trees.',
+            epilog='Examples :\n\tSynk path1 path2\n\tSynk path1 path2 -x .pyc;.dll', #'\n\tSynk -s path1 path2',
             formatter_class=argparse.RawDescriptionHelpFormatter
         )
 
@@ -351,27 +360,33 @@ class Parser:
         )
 
         self.parser.add_argument(
-            '-s', '--sync',
-            help='Synchronise the two trees to the last version (not implemented)',
-            action='store_true'
+            '-v', '--version',
+            help='Show Synk version and exit',
+            nargs=0,
+            action=self.Version
         )
+
+        # self.parser.add_argument(
+        #     '-s', '--sync',
+        #     help='Synchronise the two trees to the last version (not implemented)',
+        #     action='store_true'
+        # )
 
         self.parser.add_argument(
             '-x', '--exclude',
-            help='Patterns to exclude. "," (comma) between them.'
+            help='Patterns to exclude. ";" (semicolon, without spaces) between them.'
         )
 
         self.parser.add_argument(
             '-f', '--format',
-            help='Format of the printed paths. "h" for human readable, "n" for normal output. Default is "h".',
-            choices=('h', 'human', 'n', 'normal')
+            help='Change format of the printed paths.',
+            action='store_true'
         )
 
         self.parser.add_argument(
-            '-c', '--color',
-            help='Use color or not. 0 : no color ; 1 : use color. Default is 1.',
-            choices=(0, 1),
-            type=int
+            '-nc', '--no_color',
+            help="Don't use color.",
+            action='store_true'
         )
 
 
@@ -383,24 +398,17 @@ class Parser:
 
         #---exclude
         if args.exclude != None:
-            exclude = args.exclude.split(',')
+            exclude = args.exclude.split(';')
 
         else:
             exclude = []
 
         #---format
-        if args.format == None:
+        if args.format:
             ret_type = 'h'
 
         else:
-            ret_type = args.format
-
-        #---color
-        if args.color != None:
-            color_use = args.color
-
-        else:
-            color_use = True
+            ret_type = 'n'
 
         #---paths
         if not path.exists(args.path1):
@@ -415,13 +423,24 @@ class Parser:
             Color(Color.c_warn, color_use).out('You selected the same path two times !\nContinuing anyway ...')
 
         #------Sync
-        synker = Synk(args.path1, args.path2, color_use)
+        synker = Synk(args.path1, args.path2, not args.no_color)
 
-        if args.sync:
-            print('Todo.')
+        # if args.sync:
+        #     print('Todo.')
+        #
+        # else:
+        #     synker.gcompare(exclude, ret_type)
 
-        else:
-            synker.gcompare(exclude, ret_type)
+        synker.gcompare(exclude, ret_type)
+
+
+    class Version(argparse.Action):
+        '''Class used to show Synk version.'''
+
+        def __call__(self, parser, namespace, values, option_string):
+
+            print(f'Synk v{version}')
+            parser.exit()
 
 
 
