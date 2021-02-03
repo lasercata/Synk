@@ -4,8 +4,8 @@
 '''This script is useful to check differencies and sync trees.'''
 
 auth = 'Lasercata'
-last_update = '2021.01.30'
-version = '0.3'
+last_update = '2021.02.03'
+version = '0.3.1'
 
 
 ##-import
@@ -252,7 +252,7 @@ class Synk:
                     fc_1 = '{}{}/{}'.format(self.f_path_1, relative, file)
                     fc_2 = '{}{}/{}'.format(self.f_path_2, relative, file)
 
-                    if (file_hash(fc_1) != file_hash(fc_2)) and (True not in [j in file for j in exclude]):
+                    if (file_hash(fc_1) != file_hash(fc_2)) and (True not in [j in file for j in exclude]): #todo: also show time difference
                         if round(path.getmtime(fc_1), -2) < round(path.getmtime(fc_2), -2):
                             if ret_type == 'n':
                                 updt_f[1].append(f'.{relative}/{file}')
@@ -412,15 +412,15 @@ class Parser:
 
         #---paths
         if not path.exists(args.path1):
-            Color(Color.c_err, color_use).out(f"Synk: cannot access '{args.path1}' : No such file or directory")
+            Color(Color.c_err, not args.no_color).out(f"Synk: cannot access '{args.path1}' : No such file or directory")
             return -1
 
         if not path.exists(args.path2):
-            Color(Color.c_err, color_use).out(f"Synk: cannot access '{args.path2}' : No such file or directory")
+            Color(Color.c_err, not args.no_color).out(f"Synk: cannot access '{args.path2}' : No such file or directory")
             return -1
 
         if args.path1 == args.path2:
-            Color(Color.c_warn, color_use).out('You selected the same path two times !\nContinuing anyway ...')
+            Color(Color.c_warn, not args.no_color).out('You selected the same path two times !\nContinuing anyway ...')
 
         #------Sync
         synker = Synk(args.path1, args.path2, not args.no_color)
