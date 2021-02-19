@@ -4,8 +4,8 @@
 '''This script is useful to check differencies and sync trees.'''
 
 auth = 'Lasercata'
-last_update = '2021.02.03'
-version = '0.3.1'
+last_update = '2021.02.19'
+version = '0.3.2'
 
 
 ##-import
@@ -115,9 +115,14 @@ def listf(path_='.'):
     l = []
     f_path = path.abspath(path_)
 
-    for f in listdir(f_path):
-        if path.isfile(f_path + '/' + f):
-            l.append(f)
+    try:
+        for f in listdir(f_path):
+            if path.isfile(f_path + '/' + f):
+                l.append(f)
+
+    except OSError as err:
+        if '[Errno 5] Input/output error' in str(err):
+            Color(Color.c_err).out(str(err))
 
     return l
 
