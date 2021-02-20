@@ -18,7 +18,7 @@ $ sudo cp Synk.py /bin/Synk
 
 ## Usage
 ```
-$ Synk.py -h
+$ Synk -h
 usage: Synk [-h] [-v] [-x EXCLUDE] [-f] [-nc] path1 path2
 
 List differencies between path1 and path2.
