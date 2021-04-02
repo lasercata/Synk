@@ -4,8 +4,8 @@
 '''This script is useful to check differencies and sync trees.'''
 
 auth = 'Lasercata'
-last_update = '2021.02.19'
-version = '0.3.2'
+last_update = '2021.04.02'
+version = '0.3.3'
 
 
 ##-import
@@ -92,7 +92,16 @@ class Color:
         if sp:
             print('')
 
-        print(prompt)
+        try:
+            print(prompt)
+        
+        except UnicodeEncodeError:
+            try:
+                print(prompt.encode('utf-8', 'surrogateescape').decode('ISO-8859-1'))
+            
+            except Exception as err:
+                Color(Color.c_err).out('Synk: {}'.format(err))
+        
         Color(color_2).set()
 
 
@@ -164,13 +173,18 @@ def file_hash(fn, buffer_size=2**16, h=hashlib.sha256()):
     - buffer_size : the buffer size ;
     - h : the hash to use. Should be of the form 'hashlib.{hashtype}()'.
     '''
-
-    with open(fn, 'rb') as f:
-        b = f.read(buffer_size)
-
-        while len(b) > 0:
-            h.update(b)
+    
+    try:
+        with open(fn, 'rb') as f:
             b = f.read(buffer_size)
+
+            while len(b) > 0:
+                h.update(b)
+                b = f.read(buffer_size)
+    
+    except OSError as err:
+        if '[Errno 5] Input/output error' in str(err):
+            Color(Color.c_err).out(str(err) + f' : in file {fn}')
 
     return h.hexdigest()
 
